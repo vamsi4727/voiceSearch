@@ -1,0 +1,69 @@
+# Dependencies
+**/node_modules/
+**/.pnp
+**/.pnp.js
+
+# Python
+**/__pycache__/
+**/*.py[cod]
+**/*$py.class
+**/venv/
+**/.env
+**/.venv
+**/ENV/
+
+# Testing
+**/coverage/
+
+# Production
+**/build/
+**/dist/
+
+# Audio files and uploads
+**/uploads/
+**/training_data/
+**/*.wav
+
+# Misc
+**/.DS_Store
+**/.env.local
+**/.env.development.local
+**/.env.test.local
+**/.env.production.local
+
+# Logs
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/logs
+**/*.log
+
+# IDE
+**/.idea/
+**/.vscode/
+**/*.swp
+**/*.swo
+
+# Python virtual environment
+server/venv/
+server/.venv/
+
+# Model files
+whisper_models/
+**/whisper_models/
+**/models/
+*.pt
+
+# Virtual environments
+venv/
+**/venv/
+
+# Training data and uploads
+training_data/
+**/training_data/
+uploads/
+**/uploads/
+
+# Build directories
+**/build/
+**/dist/
