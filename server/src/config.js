@@ -5,7 +5,7 @@ require('dotenv').config({
 
 const config = {
   env: process.env.NODE_ENV || 'development',
-  port: process.env.PORT || 3000,
+  port: process.env.PORT || 3141,
   
   // Directory settings
   dirs: {
@@ -20,7 +20,7 @@ const config = {
 
   // CORS settings
   cors: {
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
+    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3344', 'http://accessibility.dg-tele.com:3344'],
     methods: ['GET', 'POST'],
     credentials: true
   },

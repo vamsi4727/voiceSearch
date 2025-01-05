@@ -10,14 +10,24 @@ from vosk import Model, KaldiRecognizer
 logging.basicConfig(level=logging.INFO, stream=sys.stderr, format='%(message)s')
 logger = logging.getLogger(__name__)
 
+def get_model_path():
+    """Get model path from environment variable or use default"""
+    env_path = os.getenv('VOSK_MODEL_PATH')
+    if env_path:
+        return env_path
+    
+    # Default paths based on environment
+    if os.name == 'nt':  # Windows
+        return os.path.join(os.path.dirname(__file__), '..', 'models', 'vosk-model-small-en-us')
+    else:  # Linux/Mac
+        return os.path.join(os.path.dirname(__file__), '../models/vosk-model-small-en-us')
+
 def recognize_speech(audio_file_path):
     start_time = time.time()
     
-    # Use absolute path
-    model_path = "D:/Work_Projects/pocVoiceSearch/server/src/models/vosk-model-small-en-us"
-    
-    # Debug output goes to stderr
+    model_path = get_model_path()
     logger.info(f"Loading model from: {model_path}")
+    
     
     try:
         model = Model(model_path)
