@@ -1,4 +1,4 @@
-const API_URL = process.env.production.REACT_APP_API_URL || 'http://localhost:3141';
+const API_URL = process.env.NODE_ENV.REACT_APP_API_URL || 'http://localhost:3141';
 
 export const endpoints = {
   // Speech recognition endpoints
