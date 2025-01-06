@@ -3,15 +3,57 @@ const path = require('path');
 const fs = require('fs').promises;
 
 class WhisperTrainingService {
+    // constructor() {
+    //     this.pythonScript = path.join(__dirname, 'whisperTrainingService.py');
+    //     this.trainingDir = path.join(__dirname, '../../../training_data');
+        
+    //     // Add path to Python executable in virtual environment
+    //     // Adjust this path according to your venv location
+    //     this.pythonPath = process.platform === 'win32'
+    //         ? path.join(__dirname, '../../../venv/Scripts/python.exe')  // Windows
+    //         : path.join(__dirname, '../../../venv/bin/python');        // Unix/Linux
+    // }
     constructor() {
         this.pythonScript = path.join(__dirname, 'whisperTrainingService.py');
         this.trainingDir = path.join(__dirname, '../../../training_data');
-        
-        // Add path to Python executable in virtual environment
-        // Adjust this path according to your venv location
-        this.pythonPath = process.platform === 'win32'
-            ? path.join(__dirname, '../../../venv/Scripts/python.exe')  // Windows
-            : path.join(__dirname, '../../../venv/bin/python');        // Unix/Linux
+        this.pythonPath = this.determinePythonPath();
+    }
+
+    determinePythonPath() {
+        try {
+            if (process.platform === 'win32') {
+                const venvPath = path.join(__dirname, '../../../venv/Scripts/python.exe');
+                if (require('fs').existsSync(venvPath)) {
+                    return venvPath;
+                }
+                throw new Error('Windows venv Python not found');
+            }
+
+            // For Unix systems, first check if python3 is available
+            try {
+                const pythonVersion = execSync('python3 --version').toString();
+                console.log('Found Python version:', pythonVersion);
+                return 'python3';
+            } catch (error) {
+                console.log('python3 command failed:', error);
+                
+                // Try python as fallback
+                try {
+                    const pythonVersion = execSync('python --version').toString();
+                    if (pythonVersion.includes('Python 3')) {
+                        console.log('Found Python version:', pythonVersion);
+                        return 'python';
+                    }
+                    throw new Error('Python 3 not found');
+                } catch (error) {
+                    console.log('python command failed:', error);
+                    throw new Error('No Python 3 installation found');
+                }
+            }
+        } catch (error) {
+            console.error('Failed to determine Python path:', error);
+            throw new Error('Could not find valid Python 3 installation');
+        }
     }
 
     async init() {
