@@ -53,14 +53,21 @@ async function recognizeSpeech(audioPath, language = 'en') {
             reject(error);
         });
         
-        // Set a timeout of 30 seconds
+        // // Set a timeout of 30 seconds
+        // const timeout = setTimeout(() => {
+        //     pythonProcess.kill();
+        //     reject(new Error('Speech recognition timed out'));
+        // }, 30000);
+        
+        // // Clear timeout when process ends
+        // pythonProcess.on('close', () => clearTimeout(timeout));
+
+        // Set timeout - longer for non-English languages
+        const timeoutDuration = language === 'en' ? 30000 : 60000;
         const timeout = setTimeout(() => {
             pythonProcess.kill();
-            reject(new Error('Speech recognition timed out'));
-        }, 30000);
-        
-        // Clear timeout when process ends
-        pythonProcess.on('close', () => clearTimeout(timeout));
+            reject(new Error(`Speech recognition timed out after ${timeoutDuration/1000} seconds`));
+        }, timeoutDuration);
     });
 }
 
