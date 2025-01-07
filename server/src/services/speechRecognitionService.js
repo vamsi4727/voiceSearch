@@ -1,10 +1,20 @@
 const { spawn } = require('child_process');
 const path = require('path');
 
-async function recognizeSpeech(audioPath) {
+// Language mapping for Google Speech Recognition
+const LANGUAGE_MAPPING = {
+    'en': 'en-US',
+    'si': 'si-LK',
+    'ta': 'ta-IN'
+};
+
+async function recognizeSpeech(audioPath, language = 'en') {
     return new Promise((resolve, reject) => {
         const pythonScript = path.join(__dirname, '../python/recognize_speech.py');
-        const pythonProcess = spawn('python', [pythonScript, audioPath]);
+        // Map the language code to the appropriate format
+        const googleLanguage = LANGUAGE_MAPPING[language] || 'en-US';
+        
+        const pythonProcess = spawn('python', [pythonScript, audioPath, googleLanguage]);
         
         let outputData = '';
         let errorData = '';

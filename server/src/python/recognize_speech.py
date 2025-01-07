@@ -3,7 +3,7 @@ import json
 import speech_recognition as sr
 import time
 
-def recognize_audio(audio_path):
+def recognize_audio(audio_path, language='en-US'):
     start_time = time.time()
     recognizer = sr.Recognizer()
     
@@ -12,8 +12,8 @@ def recognize_audio(audio_path):
             print(f"Reading audio file: {audio_path}", file=sys.stderr)
             audio = recognizer.record(source)
             
-        print("Recognizing speech...", file=sys.stderr)
-        text = recognizer.recognize_google(audio)
+        print(f"Recognizing speech in language: {language}...", file=sys.stderr)
+        text = recognizer.recognize_google(audio, language=language)
         
         result = {
             "text": text,
@@ -53,12 +53,15 @@ def recognize_audio(audio_path):
         return 1
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2:
         print(json.dumps({
             "text": "",
-            "error": "Invalid arguments. Usage: python recognize_speech.py <audio_file_path>",
+            "error": "Invalid arguments. Usage: python recognize_speech.py <audio_file_path> [language]",
             "processingTime": 0
         }))
         sys.exit(1)
     
-    sys.exit(recognize_audio(sys.argv[1]))
+    audio_file_path = sys.argv[1]
+    language = sys.argv[2] if len(sys.argv) > 2 else 'en-US'
+    
+    sys.exit(recognize_audio(audio_file_path, language))

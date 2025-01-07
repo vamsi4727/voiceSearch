@@ -18,7 +18,6 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-# Load models once at startup with medium model for non-English
 # Cache for loaded models
 _models = {}
 
@@ -32,7 +31,12 @@ def load_model(model_size, device="cpu"):
 
 def get_model(language):
     """Get appropriate model based on language"""
-    model_size = "base" if language == "en" else "medium"
+    if language == "en":
+        model_size = "tiny.en"  # Use the English-specific model for English
+        logger.info("Using English-specific tiny model")
+    else:
+        model_size = "medium"  # Use medium model for other languages
+        logger.info(f"Using medium model for {language}")
     return load_model(model_size)
 
 def get_romanization_prompt(language):
@@ -55,7 +59,6 @@ def get_romanization_prompt(language):
             "நன்றி = nandri\n"
             "Please maintain proper Tamil pronunciation patterns in romanization."
         )
-
     }
     return prompts.get(language, "Transcribe speech using English letters only")
 
@@ -71,7 +74,8 @@ def recognize_speech(audio_file_path, language='en'):
             raise FileNotFoundError(f"Audio file not found: {audio_file_path}")
             
         model = get_model(language)
-        logger.info(f"Using {'base' if language == 'en' else 'medium'} model")
+        model_name = "tiny.en" if language == "en" else "medium"
+        logger.info(f"Using {model_name} model")
         
         if language in ['si', 'ta']:
             # First pass: Get native language transcription
@@ -113,7 +117,8 @@ def recognize_speech(audio_file_path, language='en'):
                 "text": native_result["text"].strip(),
                 "romanized": romanized_text,
                 "error": None,
-                "processingTime": int((time.time() - start_time) * 1000)
+                "processingTime": int((time.time() - start_time) * 1000),
+                "model": model_name
             }
             
         else:
@@ -130,7 +135,8 @@ def recognize_speech(audio_file_path, language='en'):
                 "text": transcription["text"].strip(),
                 "romanized": transcription["text"].strip(),
                 "error": None,
-                "processingTime": int((time.time() - start_time) * 1000)
+                "processingTime": int((time.time() - start_time) * 1000),
+                "model": model_name
             }
         
         logger.info(f"Transcription completed successfully in {result['processingTime']}ms")
@@ -142,7 +148,8 @@ def recognize_speech(audio_file_path, language='en'):
             "text": "",
             "romanized": "",
             "error": str(e),
-            "processingTime": int((time.time() - start_time) * 1000)
+            "processingTime": int((time.time() - start_time) * 1000),
+            "model": "tiny.en" if language == "en" else "medium"
         }
 
 if __name__ == "__main__":

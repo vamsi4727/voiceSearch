@@ -11,9 +11,14 @@ router.post('/recognize', upload.single('audio'), async (req, res) => {
     }
 
     try {
-        const speechRecognitionResult = await speechRecognitionService.recognize(req.file.path).catch(error => ({
-            error: error.message || 'Speech Recognition processing failed'
-        }));
+        // Get language from form data, default to 'en'
+        const language = req.body.language || 'en';
+        
+        const speechRecognitionResult = await speechRecognitionService
+            .recognizeSpeech(req.file.path, language)
+            .catch(error => ({
+                error: error.message || 'Speech Recognition processing failed'
+            }));
 
         res.json({
             text: speechRecognitionResult.error ? undefined : speechRecognitionResult.text,
