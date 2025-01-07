@@ -7,14 +7,15 @@ const AudioRecorder = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [recognitionResults, setRecognitionResults] = useState({
-    speechRecognition: { text: 'Processing', error: null, status: 'processing' },
+    speechRecognition: { text: '', error: null, status: 'idle', processingTime: 0 },
     whisper: { 
-      text: 'Processing', 
-      romanized: 'Processing',  // Added romanized text field
+      text: '', 
+      romanized: '',
       error: null, 
-      status: 'processing' 
+      status: 'idle',
+      processingTime: 0
     },
-    vosk: { text: 'Processing', error: null, status: 'processing' }
+    vosk: { text: '', error: null, status: 'idle', processingTime: 0 }
   });
   const [status, setStatus] = useState('idle');
   const [actualText, setActualText] = useState('');
@@ -52,6 +53,13 @@ const AudioRecorder = () => {
       setStatus('recording');
       setShowTraining(false);
       setActualText('');
+      
+      // Reset all results
+      setRecognitionResults({
+        speechRecognition: { text: '', error: null, status: 'idle', processingTime: 0 },
+        whisper: { text: '', romanized: '', error: null, status: 'idle', processingTime: 0 },
+        vosk: { text: '', error: null, status: 'idle', processingTime: 0 }
+      });
     } catch (error) {
       console.error('Error starting recording:', error);
       setStatus('error');
@@ -74,54 +82,78 @@ const AudioRecorder = () => {
       formData.append('audio', blob, 'recording.wav');
       formData.append('language', selectedLanguage);
 
-      console.log('Audio blob:', {
-        type: blob.type,
-        size: blob.size,
-        lastModified: blob.lastModified
-      });
-  
+      // Update status for all engines to 'processing'
+      setRecognitionResults(prev => ({
+        speechRecognition: { ...prev.speechRecognition, status: 'processing' },
+        whisper: { ...prev.whisper, status: 'processing' },
+        vosk: { ...prev.vosk, status: 'processing' }
+      }));
 
-      // Process with all engines in parallel
-      const [speechResult, whisperResult, voskResult] = await Promise.all([
-        fetch(endpoints.speechRecognition, {
-          method: 'POST',
-          body: formData,
-        }).then(res => res.json()),
-        fetch(endpoints.whisper, {
-          method: 'POST',
-          body: formData,
-        }).then(res => res.json()),
-        fetch(endpoints.vosk, {
-          method: 'POST',
-          body: formData,
-        }).then(res => res.json())
-      ]);
+      // Start processing with all engines independently
+      const processEngine = async (engineName) => {
+        try {
+          const startTime = Date.now();
+          let endpoint;
+          // Get the correct endpoint based on engine name
+          switch(engineName) {
+            case 'speechRecognition':
+              endpoint = endpoints.speechRecognition;
+              break;
+            case 'whisper':
+              endpoint = endpoints.whisper;
+              break;
+            case 'vosk':
+              endpoint = endpoints.vosk;
+              break;
+            default:
+              throw new Error('Unknown engine name');
+          }
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            body: formData,
+          });
+          const result = await response.json();
+          const processingTime = Date.now() - startTime;
 
-      console.log('Speech result:', speechResult);
-      console.log('Whisper result:', whisperResult);
-      console.log('Vosk result:', voskResult);
+          setRecognitionResults(prev => ({
+            ...prev,
+            [engineName]: {
+              text: result.text || '',
+              romanized: result.romanized || result.text || '',
+              error: result.error,
+              status: 'done',
+              processingTime
+            }
+          }));
 
-      setRecognitionResults({
-        speechRecognition: {
-          text: speechResult.text || '',
-          error: speechResult.error,
-          status: 'done'
-        },
-        whisper: {
-          text: whisperResult.text || '',
-          romanized: whisperResult.romanized || whisperResult.text || '', // Get romanized version
-          error: whisperResult.error,
-          status: 'done'
-        },
-        vosk: {
-          text: voskResult.text || '',
-          error: voskResult.error,
-          status: 'done'
+          // If all engines are done, set overall status to success
+          setRecognitionResults(prev => {
+            const allDone = Object.values(prev).every(r => r.status === 'done');
+            if (allDone) {
+              setStatus('success');
+              setShowTraining(true);
+            }
+            return prev;
+          });
+        } catch (error) {
+          console.error(`Error processing ${engineName}:`, error);
+          setRecognitionResults(prev => ({
+            ...prev,
+            [engineName]: {
+              ...prev[engineName],
+              error: error.message,
+              status: 'error',
+              processingTime: 0
+            }
+          }));
         }
-      });
+      };
 
-      setShowTraining(true);
-      setStatus('success');
+      // Launch all processes in parallel
+      processEngine('speechRecognition');
+      processEngine('whisper');
+      processEngine('vosk');
+
     } catch (error) {
       console.error('Error processing recording:', error);
       setStatus('error');
@@ -194,7 +226,7 @@ const AudioRecorder = () => {
         <div className="status">{status}</div>
       </div>
 
-      {status === 'success' && (
+      {status !== 'idle' && (
         <div className="results">
           <h3>Recognition Results:</h3>
           
@@ -205,7 +237,12 @@ const AudioRecorder = () => {
             ) : recognitionResults.speechRecognition.error ? (
               <p className="error">{recognitionResults.speechRecognition.error}</p>
             ) : (
-              <p>{recognitionResults.speechRecognition.text}</p>
+              <>
+                <p>{recognitionResults.speechRecognition.text}</p>
+                {recognitionResults.speechRecognition.processingTime > 0 && (
+                  <small>Processing time: {recognitionResults.speechRecognition.processingTime}ms</small>
+                )}
+              </>
             )}
           </div>
 
@@ -216,11 +253,16 @@ const AudioRecorder = () => {
             ) : recognitionResults.whisper.error ? (
               <p className="error">{recognitionResults.whisper.error}</p>
             ) : (
-              <p>
-                {selectedLanguage === 'en' ? 
-                  recognitionResults.whisper.text : 
-                  recognitionResults.whisper.romanized}
-              </p>
+              <>
+                <p>
+                  {selectedLanguage === 'en' ? 
+                    recognitionResults.whisper.text : 
+                    recognitionResults.whisper.romanized}
+                </p>
+                {recognitionResults.whisper.processingTime > 0 && (
+                  <small>Processing time: {recognitionResults.whisper.processingTime}ms</small>
+                )}
+              </>
             )}
           </div>
 
@@ -231,7 +273,12 @@ const AudioRecorder = () => {
             ) : recognitionResults.vosk.error ? (
               <p className="error">{recognitionResults.vosk.error}</p>
             ) : (
-              <p>{recognitionResults.vosk.text}</p>
+              <>
+                <p>{recognitionResults.vosk.text}</p>
+                {recognitionResults.vosk.processingTime > 0 && (
+                  <small>Processing time: {recognitionResults.vosk.processingTime}ms</small>
+                )}
+              </>
             )}
           </div>
 
