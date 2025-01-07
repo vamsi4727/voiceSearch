@@ -92,9 +92,10 @@ const AudioRecorder = () => {
       // Start processing with all engines independently
       const processEngine = async (engineName) => {
         try {
-          const startTime = Date.now();
+          const clientStartTime = Date.now();
+          console.log(`[${engineName}] Started processing at:`, new Date(clientStartTime).toISOString());
+          
           let endpoint;
-          // Get the correct endpoint based on engine name
           switch(engineName) {
             case 'speechRecognition':
               endpoint = endpoints.speechRecognition;
@@ -108,12 +109,41 @@ const AudioRecorder = () => {
             default:
               throw new Error('Unknown engine name');
           }
+
+          console.log(`[${engineName}] Sending request to:`, endpoint);
           const response = await fetch(endpoint, {
             method: 'POST',
             body: formData,
           });
+
+          console.log(`[${engineName}] Received response at:`, new Date().toISOString());
           const result = await response.json();
-          const processingTime = Date.now() - startTime;
+          const clientEndTime = Date.now();
+          
+          // Log all timing information
+          console.log(`[${engineName}] Timing details:`, {
+            clientStartTime: new Date(clientStartTime).toISOString(),
+            clientEndTime: new Date(clientEndTime).toISOString(),
+            clientProcessingTime: clientEndTime - clientStartTime,
+            serverProcessingTime: result.processingTime, // Time reported by server
+            fullResponse: result // Log the complete response
+          });
+
+          // Use server's processing time if available, otherwise use client-side time
+          const processingTime = result.processingTime || (clientEndTime - clientStartTime);
+
+          setRecognitionResults(prev => ({
+            ...prev,
+            [engineName]: {
+              text: result.text || '',
+              romanized: result.romanized || result.text || '',
+              error: result.error,
+              status: 'done',
+              processingTime,
+              serverTime: result.processingTime, // Store server time separately
+              clientTime: clientEndTime - clientStartTime // Store client time separately
+            }
+          }));
 
           setRecognitionResults(prev => ({
             ...prev,
@@ -260,7 +290,10 @@ const AudioRecorder = () => {
                     recognitionResults.whisper.romanized}
                 </p>
                 {recognitionResults.whisper.processingTime > 0 && (
-                  <small>Processing time: {recognitionResults.whisper.processingTime}ms</small>
+                  <div className="timing-info">
+                    <small>Server processing time: {recognitionResults.whisper.serverTime}ms</small>
+                    <small>Total time: {recognitionResults.whisper.processingTime}ms</small>
+                  </div>
                 )}
               </>
             )}
