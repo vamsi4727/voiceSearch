@@ -4,7 +4,6 @@ openai-whisper==20231117
 vosk==0.3.45
 
 # Audio Processing
-PyAudio==0.2.14
 wave==0.0.2
 
 # Utilities

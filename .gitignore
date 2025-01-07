@@ -53,6 +53,10 @@ whisper_models/
 **/models/
 *.pt
 
+# Model cache directories
+model_cache/
+*/model_cache/
+
 # Virtual environments
 venv/
 **/venv/
