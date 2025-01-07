@@ -1,3 +1,7 @@
 speechrecognition
 openai-whisper
 vosk
+transformers
+torch
+librosa
+soundfile

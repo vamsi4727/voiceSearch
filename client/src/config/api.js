@@ -1,10 +1,12 @@
-const API_URL = process.env.REACT_APP_API_URL || 'http://accessibility.dg-tele.com:3141';
+const API_URL = process.env.NODE_ENV.REACT_APP_API_URL || 'http://localhost:3141';
 
 export const endpoints = {
   // Speech recognition endpoints
   speechRecognition: `${API_URL}/api/speechRecognition/recognize`,
   whisper: `${API_URL}/api/whisper/recognize`,
   vosk: `${API_URL}/api/vosk/recognize`,
+  whisperSinhala: `${API_URL}/api/whisper-sinhala/recognize`,
+  whisperTamil: `${API_URL}/api/whisper-tamil/recognize`,
   
   // Training endpoints
   whisperTraining: {

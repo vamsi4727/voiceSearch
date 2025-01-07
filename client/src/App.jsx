@@ -4,6 +4,7 @@ import AudioRecorder from './components/AudioRecorder';
 
 import './App.css';
 import TrainingDataViewer from './components/TrainingDataViewer';
+import WhisperModels from './components/WhisperModels';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
           <ul>
             <li><Link to="/">Speech Recognition</Link></li>
             <li><Link to="/training">Training Data View</Link></li>
+            <li><Link to="/whisperpage">Whisper only</Link></li>
           
           </ul>
         </nav>
@@ -20,6 +22,7 @@ function App() {
         <Routes>
           <Route path="/" element={<AudioRecorder />} />
           <Route path="/training" element={<TrainingDataViewer />} />
+          <Route path="/whisperpage" element={<WhisperModels />} />
           
         </Routes>
       </div>

@@ -39,6 +39,8 @@ const speechRecognitionRouter = require('./routes/speechRecognition');
 const whisperRouter = require('./routes/whisper');
 const voskRouter = require('./routes/vosk');
 const whisperTrainingRouter = require('./routes/whisperTraining');
+const whisperSinhalaRouter = require('./routes/whisperSinhala');  // New
+const whisperTamilRouter = require('./routes/whisperTamil');      // New
 
 // Mount route handlers
 
@@ -46,6 +48,8 @@ app.use('/api/speechRecognition', speechRecognitionRouter);
 app.use('/api/whisper', whisperRouter);
 app.use('/api/vosk', voskRouter);
 app.use('/api/whisper-training', whisperTrainingRouter);
+app.use('/api/whisper-sinhala', whisperSinhalaRouter);  // New
+app.use('/api/whisper-tamil', whisperTamilRouter);      // New
 
 // Error handling middleware must be after route handlers
 app.use((req, res, next) => {
