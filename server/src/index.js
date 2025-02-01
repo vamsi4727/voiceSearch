@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const config = require('./config');
+const { spawn } = require('child_process');
 
 const app = express();
 
@@ -61,14 +62,43 @@ app.use((err, req, res, next) => {
     res.status(500).json({ error: 'Internal Server Error' });
 });
 
-const PORT = process.env.PORT || 3141;
-// app.listen(PORT, () => {
-//     console.log(`Server is running on port ${PORT}`);
-// });
-// Create server instance
-const server = app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server is running on port ${PORT}`);
-    // Log the actual addresses being used
-    const addresses = server.address();
-    console.log('Server listening on:', addresses);
-});
+function preloadModels() {
+    return new Promise((resolve, reject) => {
+        const modelLoader = spawn('python', [
+            path.join(__dirname, 'services/model_loader.py')
+        ]);
+
+        modelLoader.stderr.on('data', (data) => {
+            console.log('Model loading:', data.toString());
+        });
+
+        modelLoader.on('close', (code) => {
+            if (code === 0) {
+                resolve();
+            } else {
+                reject(new Error(`Model loading failed with code ${code}`));
+            }
+        });
+    });
+}
+
+async function startServer() {
+    try {
+        // Pre-load models before starting server
+        await preloadModels();
+        
+        // Start your Express server
+        const PORT = process.env.PORT || 3141;
+        const server = app.listen(PORT, '0.0.0.0', () => {
+            console.log(`Server is running on port ${PORT}`);
+            // Log the actual addresses being used
+            const addresses = server.address();
+            console.log('Server listening on:', addresses);
+        });
+    } catch (error) {
+        console.error('Failed to start server:', error);
+        process.exit(1);
+    }
+}
+
+startServer();
