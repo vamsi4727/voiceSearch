@@ -71,3 +71,4 @@ uploads/
 # Build directories
 **/build/
 **/dist/
+server/my_env/
