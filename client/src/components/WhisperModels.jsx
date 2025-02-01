@@ -3,6 +3,7 @@ import { Play, Pause, RefreshCw } from 'lucide-react';
 import { audioBufferToWav } from '../utils/audioUtils';
 import { endpoints } from '../config/api';
 import './WhisperModels.css';
+import TrainingDataSubmission from './TrainingDataSubmission';
 
 const WhisperModels = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -17,6 +18,7 @@ const WhisperModels = () => {
   });
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
+  const [audioBlob, setAudioBlob] = useState(null);
 
   const getEndpointForLanguage = () => {
     switch(selectedLanguage) {
@@ -79,6 +81,7 @@ const WhisperModels = () => {
   };
 
   const handleRecordingComplete = async (blob) => {
+    setAudioBlob(blob);
     try {
       setStatus('processing');
       const formData = new FormData();
@@ -195,6 +198,17 @@ const WhisperModels = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {result.text && (
+        <TrainingDataSubmission
+          recognitionResult={result}
+          audioBlob={audioBlob}
+          language={selectedLanguage}
+          onSave={() => {
+            alert('Training data saved successfully!');
+          }}
+        />
       )}
     </div>
   );
