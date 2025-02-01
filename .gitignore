@@ -2,6 +2,7 @@
 **/node_modules/
 **/.pnp
 **/.pnp.js
+**/api.js
 
 # Python
 **/__pycache__/

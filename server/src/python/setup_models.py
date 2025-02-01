@@ -1,7 +1,11 @@
-import whisper
 import os
 import sys
+import whisper
 from transformers import WhisperForConditionalGeneration, WhisperProcessor
+from services.whisperSinhalaService import WhisperSinhalaModel
+
+# Add the parent directory to Python path so we can import from services
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 def setup_models():
     print("Setting up speech recognition models...")
@@ -19,18 +23,9 @@ def setup_models():
         print("\nDownloading English-specific Whisper model...")
         whisper.load_model("tiny.en")
         
-        # Download and cache Sinhala-specific model
-        print("\nDownloading Sinhala-specific model...")
-        sinhala_cache_dir = os.path.join(cache_dir, 'sinhala')
-        os.makedirs(sinhala_cache_dir, exist_ok=True)
-        WhisperProcessor.from_pretrained(
-            "Ransaka/whisper-tiny-sinhala-20k",
-            cache_dir=sinhala_cache_dir
-        )
-        WhisperForConditionalGeneration.from_pretrained(
-            "Ransaka/whisper-tiny-sinhala-20k",
-            cache_dir=sinhala_cache_dir
-        )
+        # Initialize and cache Sinhala model
+        print("\nInitializing Sinhala model...")
+        sinhala_model = WhisperSinhalaModel.get_instance()
         
         # Download and cache Tamil-specific model
         print("\nDownloading Tamil-specific model...")

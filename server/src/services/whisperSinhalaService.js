@@ -51,7 +51,7 @@ async function recognizeSpeech(audioPath) {
             console.error('Failed to start Python process:', error);
             reject(error);
         });
-        
+
         // Set a timeout of 30 seconds
         const timeout = setTimeout(() => {
             pythonProcess.kill();
