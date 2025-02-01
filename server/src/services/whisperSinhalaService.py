@@ -92,10 +92,48 @@ def romanize_sinhala(text):
     
     # Common word mappings
     common_words = {
+        # Musical terms
         'සර': 'sara',
         'ස්ව': 'swa',
         'වියා': 'viya',
-        # Add more common words
+        'ගීත': 'geetha',
+        'සංගීත': 'sangeeta',
+        'ගායනා': 'gayana',
+        'සිංදු': 'sindu',
+        
+        # Common expressions in songs
+        'ආදරය': 'adaraya',
+        'පෙම්': 'pem',
+        'හිත': 'hitha',
+        'සිත': 'sitha',
+        'හදවත': 'hadawatha',
+        'ජීවිතේ': 'jeevithey',
+        
+        # Nature words (common in lyrics)
+        'මල්': 'mal',
+        'සඳ': 'sanda',
+        'හිරු': 'hiru',
+        'සුළං': 'sulang',
+        'වැස්ස': 'wessa',
+        
+        # Emotional terms
+        'දුක': 'duka',
+        'සතුට': 'sathutu',
+        'සිනා': 'sina',
+        'කඳුළු': 'kandulu',
+        
+        # Time-related
+        'රෑ': 'rae',
+        'දවස': 'dawasa',
+        'කාලය': 'kalaya',
+        
+        # Commonly used verbs in songs
+        'ගායනා': 'gayana',
+        'නටනවා': 'natanawa',
+        'ඇවිදිනවා': 'awidinnawa',
+        'සිතනවා': 'sithanawa',
+        # Add more common words 
+        
     }
     
     # First try common words
